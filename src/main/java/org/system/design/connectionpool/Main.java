@@ -1,5 +1,7 @@
 package org.system.design.connectionpool;
 
+import org.system.design.commons.ConnectionPool;
+
 import java.sql.*;
 
 public class Main {

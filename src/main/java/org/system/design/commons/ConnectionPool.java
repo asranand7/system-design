@@ -1,4 +1,4 @@
-package org.system.design.connectionpool;
+package org.system.design.commons;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
