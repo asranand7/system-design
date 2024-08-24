@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emoji Stream</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        #emoji-container {
+            font-size: 2rem;
+            white-space: normal; /* Allows emojis to wrap to the next line */
+            overflow-wrap: break-word; /* Ensures wrapping behavior is applied */
+            margin-top: 20px;
+            border: 1px solid #ccc; /* Optional: border to make the container visible */
+            padding: 10px; /* Optional: padding for better visibility */
+            display: inline-block; /* Allows the container to wrap around the screen */
+            max-width: 100%; /* Ensures the container does not exceed screen width */
+        }
+        #stop-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #stop-button:hover {
+            background-color: #d32f2f;
+        }
+        #thanks-message {
+            margin-top: 20px;
+            font-size: 1.5rem;
+            color: green;
+            white-space: pre-wrap; /* Preserve white space and line breaks */
+        }
+    </style>
+</head>
+<body>
+<h1>Emoji Stream</h1>
+<div id="emoji-container">Your emoji train...</div>
+<button id="stop-button">STOP ME ELSE I WILL BECOME LONGER THAN EARTH</button>
+<div id="thanks-message"></div>
+
+<script>
+        let eventSource;
+        let isStopped = false; // Flag to control stopping the connection
+
+        function initializeSSE() {
+            if (isStopped) return; // Don't initialize if stopped
+
+            eventSource = new EventSource('/api/emojis');
+            const emojiContainer = document.getElementById('emoji-container');
+
+            eventSource.onmessage = function(event) {
+                emojiContainer.innerHTML += event.data; // Append received emoji without new line
+            };
+
+            eventSource.onerror = function(event) {
+                console.error('Error occurred:', event);
+                // Close and retry connection immediately
+                eventSource.close();
+                if (!isStopped) {
+                    initializeSSE(); // Retry connection immediately
+                }
+            };
+
+            eventSource.onopen = function(event) {
+                console.log('SSE connection opened.');
+            };
+
+            eventSource.onclose = function(event) {
+                console.log('SSE connection closed.');
+                if (!isStopped) {
+                    // Retry immediately if not stopped
+                    initializeSSE();
+                }
+            };
+        }
+
+        // Initialize the SSE connection when the page loads
+        window.onload = initializeSSE;
+
+        // Stop the connection and prevent further API calls when the button is clicked
+        document.getElementById('stop-button').addEventListener('click', () => {
+            if (isStopped) return; // Prevent multiple clicks from having effect
+            isStopped = true;
+            if (eventSource) {
+                eventSource.close();
+                const emojiContainer = document.getElementById('emoji-container');
+                emojiContainer.innerHTML += '<br>Emoji streaming stopped.<br>'; // Add line breaks
+                document.getElementById('thanks-message').textContent = 'Thanks for saving me buddy';
+            }
+        });
+    </script>
+</body>
+</html>
