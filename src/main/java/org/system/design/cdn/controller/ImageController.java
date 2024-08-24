@@ -40,14 +40,11 @@ class ImageController {
 
         byte[] imageBytes;
 
-        // Check if the image is cached locally
         if (cachedImage.exists()) {
             imageBytes = Files.readAllBytes(cachedImage.toPath());
         } else {
-            // Construct the full URL to fetch the image from the origin server
             String imageUrl = ORIGIN_BASE_URL + "/" + imagePath;
 
-            // Fetch the image from the origin server
             Request fetchRequest = new Request.Builder()
                     .url(imageUrl)
                     .build();
@@ -65,10 +62,7 @@ class ImageController {
                 Files.write(Paths.get(CACHE_DIR + cacheKey), imageBytes);
             }
         }
-
-        // Determine the image type (e.g., jpeg, png) and set the content type
-        String contentType = Files.probeContentType(Paths.get(imagePath));
-        contentType = "image/jpeg"; // Default to binary if unknown
+        String contentType = "image/jpeg";
         response.setContentType(contentType);
 
         // Write the image bytes to the response output stream
